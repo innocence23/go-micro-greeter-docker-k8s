@@ -1,0 +1,86 @@
+# k8s/deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: greeter-service
+  namespace: go-micro
+spec:
+  selector:
+    matchLabels:
+      app: greeter-service
+  template:
+    metadata:
+      labels:
+        app: greeter-service
+    spec:
+      containers:
+      - name: greeter-service
+        image: greeter-service:latest
+        imagePullPolicy: Never
+        resources:
+          limits:
+            memory: "32Mi"
+            cpu: "50m"
+        ports:
+        - containerPort: 50051
+        env:
+        - name: MICRO_SERVER_ADDRESS
+          value: ":50051"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: greeter-client
+  namespace: go-micro
+spec:
+  selector:
+    matchLabels:
+      app: greeter-client
+  template:
+    metadata:
+      labels:
+        app: greeter-client
+    spec:
+      containers:
+      - name: greeter-client
+        image: greeter-client:latest
+        imagePullPolicy: Never
+        resources:
+          limits:
+            memory: "32Mi"
+            cpu: "50m"
+        ports:
+        - containerPort: 3000
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: etcd
+  namespace: go-micro
+spec:
+  selector:
+    matchLabels:
+      app: etcd
+  template:
+    metadata:
+      labels:
+        app: etcd
+    spec:
+      containers:
+      - name: etcd
+        image: bitnami/etcd:latest
+        resources:
+          limits:
+            memory: "64Mi"
+            cpu: "100m"
+        ports:
+        - containerPort: 2379
+        - containerPort: 2380
+        env:
+        - name: ALLOW_NONE_AUTHENTICATION
+          value: "yes"
+        - name: ETCD_ADVERTISE_CLIENT_URLS
+          value: "http://etcd:2379"
